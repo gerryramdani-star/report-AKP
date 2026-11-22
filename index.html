@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Revenue Marketing — Ayam Kukus Priangan</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #F5F5F7;
+      color: #1D1D1F;
+    }
+    .apple-card {
+      background: #FFFFFF;
+      border-radius: 18px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .apple-card:hover {
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+    }
+    .brand-green {
+      background-color: #095C2B;
+    }
+    .brand-green-text {
+      color: #095C2B;
+    }
+    .pill-active {
+      background-color: #095C2B;
+      color: #FFFFFF;
+    }
+    .pill-inactive {
+      background-color: #E8E8ED;
+      color: #424245;
+    }
+    .pill-inactive:hover {
+      background-color: #DCDCE2;
+    }
+  </style>
+</head>
+<body class="antialiased selection:bg-emerald-900 selection:text-white">
+
+  <!-- Top Navigation Header -->
+  <header class="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-200/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl brand-green flex items-center justify-center text-white font-bold text-sm shadow-sm">
+          AKP
+        </div>
+        <div>
+          <h1 class="text-base sm:text-lg font-bold tracking-tight text-gray-900 leading-tight">
+            Dashboard Revenue Marketing
+          </h1>
+          <p class="text-xs text-gray-500">Ayam Kukus Priangan • Tracking Omzet & Campaign Harian</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 sm:gap-3">
+        <span id="connectionStatus" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200">
+          <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+          Mode Demo (Siap Hubungkan API)
+        </span>
+        <button onclick="openConfigModal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-gray-900 text-white hover:bg-gray-800 transition cursor-pointer">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          </svg>
+          Hubungkan Sheet
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- Filter Bar -->
+    <section class="apple-card p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <!-- Branch Filter -->
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-xs font-semibold uppercase tracking-wider text-gray-400 mr-1">Cabang:</span>
+        <button data-branch="ALL" onclick="setBranch('ALL')" class="branch-btn pill-active px-3.5 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer">
+          Semua Cabang
+        </button>
+        <button data-branch="Dago" onclick="setBranch('Dago')" class="branch-btn pill-inactive px-3.5 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer">
+          Kota Bandung (Dago)
+        </button>
+        <button data-branch="Soreang" onclick="setBranch('Soreang')" class="branch-btn pill-inactive px-3.5 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer">
+          Soreang
+        </button>
+      </div>
+
+      <!-- Date Range Filter -->
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-xs font-semibold uppercase tracking-wider text-gray-400 mr-1">Periode:</span>
+        <button data-range="today" onclick="setDatePreset('today')" class="range-btn pill-inactive px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer">
+          Hari Ini
+        </button>
+        <button data-range="7d" onclick="setDatePreset('7d')" class="range-btn pill-inactive px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer">
+          7 Hari Terakhir
+        </button>
+        <button data-range="month" onclick="setDatePreset('month')" class="range-btn pill-inactive px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer">
+          Bulan Ini
+        </button>
+        <button data-range="all" onclick="setDatePreset('all')" class="range-btn pill-active px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer">
+          Semua Data
+        </button>
+
+        <div class="flex items-center gap-1.5 bg-gray-100 px-2.5 py-1 rounded-xl border border-gray-200/80 ml-0 sm:ml-1">
+          <input type="date" id="startDate" onchange="applyCustomDate()" class="bg-transparent text-xs font-medium text-gray-700 focus:outline-none" />
+          <span class="text-gray-400 text-xs">–</span>
+          <input type="date" id="endDate" onchange="applyCustomDate()" class="bg-transparent text-xs font-medium text-gray-700 focus:outline-none" />
+        </div>
+      </div>
+    </section>
+
+    <!-- Primary KPI Cards (6 Cards) -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <!-- KPI 1: Omzet Kotor -->
+      <div class="apple-card p-5">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold uppercase tracking-wider text-gray-400">Omzet Kotor (Gross)</span>
+          <span class="p-2 rounded-xl bg-emerald-50 text-emerald-700">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          </span>
+        </div>
+        <div id="kpiGrossRev" class="mt-3 text-2xl font-bold text-gray-900">Rp 0</div>
+        <p id="kpiTotalOrders" class="mt-1 text-xs text-gray-500">0 total transaksi tercatat</p>
+      </div>
+
+      <!-- KPI 2: Omzet Bersih -->
+      <div class="apple-card p-5">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold uppercase tracking-wider text-gray-400">Omzet Bersih (Net Revenue)</span>
+          <span class="p-2 rounded-xl bg-teal-50 text-teal-700">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          </span>
+        </div>
+        <div id="kpiNetRev" class="mt-3 text-2xl font-bold brand-green-text">Rp 0</div>
+        <p id="kpiCommissionCut" class="mt-1 text-xs text-gray-500">Potongan komisi marketplace: Rp 0</p>
+      </div>
+
+      <!-- KPI 3: Total Ad Spend -->
+      <div class="apple-card p-5">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold uppercase tracking-wider text-gray-400">Total Biaya Iklan (Ad Spend)</span>
+          <span class="p-2 rounded-xl bg-amber-50 text-amber-700">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>
+          </span>
+        </div>
+        <div id="kpiAdSpend" class="mt-3 text-2xl font-bold text-gray-900">Rp 0</div>
+        <p id="kpiAdShare" class="mt-1 text-xs text-gray-500">Rasio biaya iklan terhadap omzet: 0%</p>
+      </div>
+
+      <!-- KPI 4: Direct ROAS -->
+      <div class="apple-card p-5">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold uppercase tracking-wider text-gray-400">Direct ROAS (Kode Campaign)</span>
+          <span class="p-2 rounded-xl bg-blue-50 text-blue-700">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+          </span>
+        </div>
+        <div id="kpiDirectRoas" class="mt-3 text-2xl font-bold text-gray-900">0.00x</div>
+        <p id="kpiCampaignRev" class="mt-1 text-xs text-gray-500">Omzet terukur kode campaign: Rp 0</p>
+      </div>
+
+      <!-- KPI 5: Blended ROAS (MER) -->
+      <div class="apple-card p-5">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold uppercase tracking-wider text-gray-400">Blended ROAS (MER Makro)</span>
+          <span class="p-2 rounded-xl bg-indigo-50 text-indigo-700">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+          </span>
+        </div>
+        <div id="kpiBlendedRoas" class="mt-3 text-2xl font-bold text-gray-900">0.00x</div>
+        <p class="mt-1 text-xs text-gray-500">Total omzet kotor ÷ total biaya iklan</p>
+      </div>
+
+      <!-- KPI 6: Funnel Chat WhatsApp -->
+      <div class="apple-card p-5">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold uppercase tracking-wider text-gray-400">Konversi Funnel WhatsApp</span>
+          <span class="p-2 rounded-xl bg-green-50 text-green-700">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 8.63 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+          </span>
+        </div>
+        <div id="kpiWaConv" class="mt-3 text-2xl font-bold text-gray-900">0%</div>
+        <p id="kpiWaDetail" class="mt-1 text-xs text-gray-500">0 closing dari 0 chat masuk (Rp 0)</p>
+      </div>
+    </section>
+
+    <!-- Charts Section -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Chart 1: Tren Harian Ad Spend vs Total Omzet -->
+      <div class="apple-card p-5 lg:col-span-2 flex flex-col">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+          <div>
+            <h2 class="text-sm font-bold text-gray-900">Tren Harian: Biaya Iklan vs. Total Omzet</h2>
+            <p class="text-xs text-gray-500">Perbandingan belanja iklan harian dengan omzet kotor & bersih</p>
+          </div>
+        </div>
+        <div class="relative h-72 w-full">
+          <canvas id="dailyTrendChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Chart 2: Kontribusi Kanal Penjualan -->
+      <div class="apple-card p-5 flex flex-col">
+        <div class="mb-4">
+          <h2 class="text-sm font-bold text-gray-900">Kontribusi Omzet per Kanal</h2>
+          <p class="text-xs text-gray-500">Proporsi POS Kasir, WhatsApp, GoFood & GrabFood</p>
+        </div>
+        <div class="relative h-56 w-full flex items-center justify-center">
+          <canvas id="channelChart"></canvas>
+        </div>
+        <div id="channelLegendList" class="mt-4 space-y-2 text-xs"></div>
+      </div>
+    </section>
+
+    <!-- Table Section: Performa Kode Campaign -->
+    <section class="apple-card overflow-hidden">
+      <div class="p-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div>
+          <h2 class="text-sm font-bold text-gray-900">Peringkat Performa Kode Campaign & Sumber Organik</h2>
+          <p class="text-xs text-gray-500">Akumulasi jumlah transaksi, nilai closing kotor, dan omzet bersih berdasarkan kode dari kasir & admin WA</p>
+        </div>
+        <span class="text-xs font-medium text-gray-400">Diurutkan dari nominal terbesar</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-gray-50/80 border-b border-gray-100 text-[11px] font-semibold uppercase tracking-wider text-gray-500">
+              <th class="py-3 px-5">Peringkat</th>
+              <th class="py-3 px-5">Kode Campaign</th>
+              <th class="py-3 px-5">Kanal Dominan</th>
+              <th class="py-3 px-5 text-right">Jumlah Transaksi</th>
+              <th class="py-3 px-5 text-right">Omzet Kotor</th>
+              <th class="py-3 px-5 text-right">Omzet Bersih</th>
+              <th class="py-3 px-5 text-right">Porsi Omzet</th>
+            </tr>
+          </thead>
+          <tbody id="campaignTableBody" class="divide-y divide-gray-100 text-xs sm:text-sm">
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modal Config Google Apps Script API -->
+  <div id="configModal" class="fixed inset-0 z-50 hidden bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-gray-100 space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-bold text-gray-900">Koneksi Google Apps Script (JSON API)</h3>
+        <button onclick="closeConfigModal()" class="text-gray-400 hover:text-gray-600 text-lg font-bold cursor-pointer">&times;</button>
+      </div>
+      <p class="text-xs text-gray-600 leading-relaxed">
+        Tempelkan URL Web App dari <strong>Google Apps Script</strong> spreadsheet Anda di bawah ini agar dashboard menarik data <em>real-time</em> secara aman tanpa mempublikasikan file ke publik.
+      </p>
+      <div>
+        <label class="block text-xs font-semibold text-gray-700 mb-1">URL Web App Google Apps Script</label>
+        <input type="url" id="apiUrlInput" placeholder="https://script.google.com/macros/s/AKfycb.../exec" class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-xs focus:outline-none focus:border-emerald-700" />
+      </div>
+      <div class="flex items-center justify-between pt-2">
+        <button onclick="resetToDemoData()" class="px-3.5 py-2 rounded-xl text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 transition cursor-pointer">
+          Gunakan Data Demo
+        </button>
+        <div class="flex items-center gap-2">
+          <button onclick="closeConfigModal()" class="px-3.5 py-2 rounded-xl text-xs font-semibold text-gray-500 hover:text-gray-700 cursor-pointer">
+            Batal
+          </button>
+          <button onclick="saveApiUrl()" class="px-4 py-2 rounded-xl text-xs font-semibold text-white brand-green hover:opacity-95 transition cursor-pointer">
+            Simpan & Muat Data
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // 1. KONFIGURASI URL GOOGLE APPS SCRIPT (ISI DI SINI ATAU LEWAT TOMBOL UI)
+    // =========================================================================
+    const DEFAULT_APPS_SCRIPT_URL = "";
+
+    // Data simulasi bawaan agar dashboard langsung hidup saat pertama kali dibuka
+    const DEMO_DATA = [
+      { Tanggal: "2026-11-18", Cabang: "Dago", Sumber_Data: "POS", Kode_Campaign: "AKP-DINE", Chat_Masuk: 0, Jumlah_Transaksi: 42, Omzet_Kotor: 3150000, Komisi_Persen: 0, Omzet_Bersih: 3150000, Biaya_Iklan: 0 },
+      { Tanggal: "2026-11-18", Cabang: "Dago", Sumber_Data: "WA", Kode_Campaign: "AKP-WA", Chat_Masuk: 28, Jumlah_Transaksi: 16, Omzet_Kotor: 1440000, Komisi_Persen: 0, Omzet_Bersih: 1440000, Biaya_Iklan: 0 },
+      { Tanggal: "2026-11-18", Cabang: "Dago", Sumber_Data: "GoFood", Kode_Campaign: "ORGANIK", Chat_Masuk: 0, Jumlah_Transaksi: 24, Omzet_Kotor: 1680000, Komisi_Persen: 0.20, Omzet_Bersih: 1344000, Biaya_Iklan: 0 },
+      { Tanggal: "2026-11-18", Cabang: "Dago", Sumber_Data: "GrabFood", Kode_Campaign: "ORGANIK", Chat_Masuk: 0, Jumlah_Transaksi: 19, Omzet_Kotor: 1330000, Komisi_Persen: 0.20, Omzet_Bersih: 1064000, Biaya_Iklan: 0 },
+      { Tanggal: "2026-11-18", Cabang: "Dago", Sumber_Data: "Meta_Ads", Kode_Campaign: "BOFU-DAGO-WA", Chat_Masuk: 0, Jumlah_Transaksi: 0, Omzet_Kotor: 0, Komisi_Persen: 0, Omzet_Bersih: 0, Biaya_Iklan: 350000 },
+
+      { Tanggal: "2026-11-19", Cabang: "Dago", Sumber_Data: "POS", Kode_Campaign: "AKP-KOL01", Chat_Masuk: 0, Jumlah_Transaksi: 51, Omzet_Kotor: 4080000, Komisi_Persen: 0, Omzet_Bersih: 4080000, Biaya_Iklan: 0 },
+      { Tanggal: "2026-11-19", Cabang: "Dago", Sumber_Data: "WA", Kode_Campaign: "AKP-WA", Chat_Masuk: 34, Jumlah_Transaksi: 21, Omzet_Kotor: 1890000, Komisi_Persen: 0, Omzet_Bersih: 1890000, Biaya_Iklan: 0 },
+      { Tanggal: "2026-11-19", Cabang: "Dago", Sumber_Data: "GoFood", Kode_Campaign: "ORGANIK", Chat_Masuk: 0, Jumlah_Transaksi: 29, Omzet_Kotor: 2030000, Komisi_Persen: 0.20, Omzet_Bersih: 1624000, Biaya_Iklan: 0 },
+      { Tanggal: "2026-11-19", Cabang: "Dago", Sumber_Data: "Meta_Ads", Kode_Campaign: "BOFU-DAGO-WA", Chat_Masuk: 0, Jumlah_Transaksi: 0, Omzet_Kotor: 0, Komisi_Persen: 0, Omzet_Bersih: 0, Biaya_Iklan: 400000 },
+
+      { Tanggal: "2026-11-20", Cabang: "Soreang", Sumber_Data: "WA", Kode_Campaign: "AKP-WA", Chat_Masuk: 22, Jumlah_Transaksi: 14, Omzet_Kotor: 2450000, Komisi_Persen: 0, Omzet_Bersih: 2450000, Biaya_Iklan: 0 },
+      { Tanggal: "2026-11-20", Cabang: "Soreang", Sumber_Data: "POS", Kode_Campaign: "AKP-DINE", Chat_Masuk: 0, Jumlah_Transaksi: 31, Omzet_Kotor: 2325000, Komisi_Persen: 0, Omzet_Bersih: 2325000, Biaya_Iklan: 0 },
+      { Tanggal: "2026-11-20", Cabang: "Soreang", Sumber_Data: "Meta_Ads", Kode_Campaign: "TOFU-SOREANG", Chat_Masuk: 0, Jumlah_Transaksi: 0, Omzet_Kotor: 0, Komisi_Persen: 0, Omzet_Bersih: 0, Biaya_Iklan: 250000 },
+
+      { Tanggal: "2026-11-21", Cabang: "Dago", Sumber_Data: "POS", Kode_Campaign: "ORGANIK", Chat_Masuk: 0, Jumlah_Transaksi: 48, Omzet_Kotor: 3600000, Komisi_Persen: 0, Omzet_Bersih: 3600000, Biaya_Iklan: 0 },
+      { Tanggal: "2026-11-21", Cabang: "Dago", Sumber_Data: "GrabFood", Kode_Campaign: "ORGANIK", Chat_Masuk: 0, Jumlah_Transaksi: 26, Omzet_Kotor: 1820000, Komisi_Persen: 0.20, Omzet_Bersih: 1456000, Biaya_Iklan: 0 },
+      { Tanggal: "2026-11-21", Cabang: "Soreang", Sumber_Data: "POS", Kode_Campaign: "AKP-KOL01", Chat_Masuk: 0, Jumlah_Transaksi: 38, Omzet_Kotor: 3040000, Komisi_Persen: 0, Omzet_Bersih: 3040000, Biaya_Iklan: 0 },
+      { Tanggal: "2026-11-21", Cabang: "Soreang", Sumber_Data: "WA", Kode_Campaign: "AKP-WA", Chat_Masuk: 30, Jumlah_Transaksi: 19, Omzet_Kotor: 2850000, Komisi_Persen: 0, Omzet_Bersih: 2850000, Biaya_Iklan: 0 },
+      { Tanggal: "2026-11-21", Cabang: "Soreang", Sumber_Data: "Meta_Ads", Kode_Campaign: "TEASER-SOREANG", Chat_Masuk: 0, Jumlah_Transaksi: 0, Omzet_Kotor: 0, Komisi_Persen: 0, Omzet_Bersih: 0, Biaya_Iklan: 300000 },
+
+      { Tanggal: "2026-11-22", Cabang: "Dago", Sumber_Data: "POS", Kode_Campaign: "AKP-DINE", Chat_Masuk: 0, Jumlah_Transaksi: 56, Omzet_Kotor: 4480000, Komisi_Persen: 0, Omzet_Bersih: 4480000, Biaya_Iklan: 0 },
+      { Tanggal: "2026-11-22", Cabang: "Dago", Sumber_Data: "GoFood", Kode_Campaign: "ORGANIK", Chat_Masuk: 0, Jumlah_Transaksi: 33, Omzet_Kotor: 2310000, Komisi_Persen: 0.20, Omzet_Bersih: 1848000, Biaya_Iklan: 0 },
+      { Tanggal: "2026-11-22", Cabang: "Dago", Sumber_Data: "Meta_Ads", Kode_Campaign: "BOFU-DAGO-ALL", Chat_Masuk: 0, Jumlah_Transaksi: 0, Omzet_Kotor: 0, Komisi_Persen: 0, Omzet_Bersih: 0, Biaya_Iklan: 450000 },
+      { Tanggal: "2026-11-22", Cabang: "Soreang", Sumber_Data: "POS", Kode_Campaign: "AKP-DINE", Chat_Masuk: 0, Jumlah_Transaksi: 45, Omzet_Kotor: 3825000, Komisi_Persen: 0, Omzet_Bersih: 3825000, Biaya_Iklan: 0 },
+      { Tanggal: "2026-11-22", Cabang: "Soreang", Sumber_Data: "WA", Kode_Campaign: "AKP-WA", Chat_Masuk: 36, Jumlah_Transaksi: 24, Omzet_Kotor: 3360000, Komisi_Persen: 0, Omzet_Bersih: 3360000, Biaya_Iklan: 0 },
+      { Tanggal: "2026-11-22", Cabang: "Soreang", Sumber_Data: "GoFood", Kode_Campaign: "ORGANIK", Chat_Masuk: 0, Jumlah_Transaksi: 18, Omzet_Kotor: 1260000, Komisi_Persen: 0.20, Omzet_Bersih: 1008000, Biaya_Iklan: 0 },
+      { Tanggal: "2026-11-22", Cabang: "Soreang", Sumber_Data: "Meta_Ads", Kode_Campaign: "TEASER-SOREANG", Chat_Masuk: 0, Jumlah_Transaksi: 0, Omzet_Kotor: 0, Komisi_Persen: 0, Omzet_Bersih: 0, Biaya_Iklan: 350000 }
+    ];
+
+    let rawRecords = [];
+    let selectedBranch = "ALL";
+    let selectedPreset = "all";
+    let trendChartInstance = null;
+    let channelChartInstance = null;
+
+    // Format Rupiah Indonesia
+    function formatIDR(num) {
+      return new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        maximumFractionDigits: 0
+      }).format(num || 0);
+    }
+
+    function formatCompactIDR(num) {
+      if (num >= 1000000) return "Rp " + (num / 1000000).toFixed(1) + " jt";
+      if (num >= 1000) return "Rp " + (num / 1000).toFixed(0) + " rb";
+      return "Rp " + num;
+    }
+
+    // Normalisasi baris dari Apps Script JSON
+    function normalizeRecord(row) {
+      const gross = Number(row.Omzet_Kotor) || 0;
+      let comm = Number(row.Komisi_Persen) || 0;
+      if (comm > 1) comm = comm / 100; // jaga-jaga jika dikirim angka 20 alih-alih 0.20
+      const net = row.Omzet_Bersih !== undefined && row.Omzet_Bersih !== ""
+        ? Number(row.Omzet_Bersih)
+        : gross * (1 - comm);
+
+      return {
+        Tanggal: String(row.Tanggal || "").slice(0, 10),
+        Cabang: String(row.Cabang || "").trim(),
+        Sumber_Data: String(row.Sumber_Data || "").trim(),
+        Kode_Campaign: String(row.Kode_Campaign || "ORGANIK").trim().toUpperCase(),
+        Chat_Masuk: Number(row.Chat_Masuk) || 0,
+        Jumlah_Transaksi: Number(row.Jumlah_Transaksi) || 0,
+        Omzet_Kotor: gross,
+        Komisi_Persen: comm,
+        Omzet_Bersih: net,
+        Biaya_Iklan: Number(row.Biaya_Iklan) || 0
+      };
+    }
+
+    // Load data dari API atau Demo
+    async function initDashboard() {
+      const savedUrl = localStorage.getItem("akp_sheets_api_url") || DEFAULT_APPS_SCRIPT_URL;
+      document.getElementById("apiUrlInput").value = savedUrl;
+
+      if (savedUrl) {
+        updateStatus("loading");
+        try {
+          const res = await fetch(savedUrl);
+          const json = await res.json();
+          const rows = Array.isArray(json) ? json : (json.data || []);
+          rawRecords = rows.map(normalizeRecord).filter(r => r.Tanggal);
+          updateStatus("connected");
+        } catch (err) {
+          console.error("Gagal memuat API Apps Script:", err);
+          rawRecords = DEMO_DATA.map(normalizeRecord);
+          updateStatus("error");
+        }
+      } else {
+        rawRecords = DEMO_DATA.map(normalizeRecord);
+        updateStatus("demo");
+      }
+
+      setDatePreset("all");
+    }
+
+    function updateStatus(state) {
+      const badge = document.getElementById("connectionStatus");
+      if (state === "connected") {
+        badge.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-800 border border-emerald-200";
+        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-600"></span> Terhubung ke Google Sheets`;
+      } else if (state === "loading") {
+        badge.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-800 border border-blue-200";
+        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-blue-500 animate-ping"></span> Memuat Data Sheet...`;
+      } else if (state === "error") {
+        badge.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-50 text-red-800 border border-red-200";
+        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500"></span> Gagal Koneksi API (Fallback Demo)`;
+      } else {
+        badge.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200";
+        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> Mode Demo (Siap Hubungkan API)`;
+      }
+    }
+
+    // Filter Controls
+    function setBranch(branch) {
+      selectedBranch = branch;
+      document.querySelectorAll(".branch-btn").forEach(btn => {
+        if (btn.dataset.branch === branch) {
+          btn.classList.remove("pill-inactive");
+          btn.classList.add("pill-active");
+        } else {
+          btn.classList.remove("pill-active");
+          btn.classList.add("pill-inactive");
+        }
+      });
+      renderDashboard();
+    }
+
+    function setDatePreset(preset) {
+      selectedPreset = preset;
+      document.querySelectorAll(".range-btn").forEach(btn => {
+        if (btn.dataset.range === preset) {
+          btn.classList.remove("pill-inactive");
+          btn.classList.add("pill-active");
+        } else {
+          btn.classList.remove("pill-active");
+          btn.classList.add("pill-inactive");
+        }
+      });
+
+      if (rawRecords.length === 0) return;
+
+      const sortedDates = [...new Set(rawRecords.map(r => r.Tanggal))].sort();
+      const latestDateStr = sortedDates[sortedDates.length - 1];
+      const earliestDateStr = sortedDates[0];
+      const latestDate = new Date(latestDateStr + "T00:00:00");
+
+      let startStr = earliestDateStr;
+      let endStr = latestDateStr;
+
+      if (preset === "today") {
+        startStr = latestDateStr;
+      } else if (preset === "7d") {
+        const d = new Date(latestDate);
+        d.setDate(d.getDate() - 6);
+        startStr = d.toISOString().slice(0, 10);
+      } else if (preset === "month") {
+        startStr = latestDateStr.slice(0, 7) + "-01";
+      }
+
+      document.getElementById("startDate").value = startStr;
+      document.getElementById("endDate").value = endStr;
+      renderDashboard();
+    }
+
+    function applyCustomDate() {
+      selectedPreset = "custom";
+      document.querySelectorAll(".range-btn").forEach(btn => {
+        btn.classList.remove("pill-active");
+        btn.classList.add("pill-inactive");
+      });
+      renderDashboard();
+    }
+
+    // Render All Metrics, Charts & Table
+    function renderDashboard() {
+      const startDate = document.getElementById("startDate").value;
+      const endDate = document.getElementById("endDate").value;
+
+      const filtered = rawRecords.filter(r => {
+        const matchBranch = selectedBranch === "ALL" || r.Cabang.toLowerCase() === selectedBranch.toLowerCase();
+        const matchStart = !startDate || r.Tanggal >= startDate;
+        const matchEnd = !endDate || r.Tanggal <= endDate;
+        return matchBranch && matchStart && matchEnd;
+      });
+
+      // Hitung KPI
+      let totalGross = 0;
+      let totalNet = 0;
+      let totalOrders = 0;
+      let totalAdSpend = 0;
+      let directCampaignRev = 0;
+      let waChats = 0;
+      let waOrders = 0;
+      let waRev = 0;
+
+      const channelTotals = {
+        POS: 0,
+        WA: 0,
+        GoFood: 0,
+        GrabFood: 0
+      };
+
+      const dailyMap = {};
+      const campaignMap = {};
+
+      filtered.forEach(r => {
+        if (!dailyMap[r.Tanggal]) {
+          dailyMap[r.Tanggal] = { gross: 0, net: 0, spend: 0 };
+        }
+
+        if (r.Sumber_Data === "Meta_Ads") {
+          totalAdSpend += r.Biaya_Iklan;
+          dailyMap[r.Tanggal].spend += r.Biaya_Iklan;
+        } else {
+          totalGross += r.Omzet_Kotor;
+          totalNet += r.Omzet_Bersih;
+          totalOrders += r.Jumlah_Transaksi;
+          dailyMap[r.Tanggal].gross += r.Omzet_Kotor;
+          dailyMap[r.Tanggal].net += r.Omzet_Bersih;
+
+          // Cek apakah memakai kode campaign (bukan ORGANIK)
+          if (r.Kode_Campaign && r.Kode_Campaign !== "ORGANIK" && r.Kode_Campaign !== "-") {
+            directCampaignRev += r.Omzet_Kotor;
+          }
+
+          // Akumulasi per Kanal
+          if (channelTotals[r.Sumber_Data] !== undefined) {
+            channelTotals[r.Sumber_Data] += r.Omzet_Kotor;
+          }
+
+          // Funnel WA
+          if (r.Sumber_Data === "WA") {
+            waChats += r.Chat_Masuk;
+            waOrders += r.Jumlah_Transaksi;
+            waRev += r.Omzet_Kotor;
+          }
+
+          // Akumulasi Kode Campaign
+          const codeKey = r.Kode_Campaign || "ORGANIK";
+          if (!campaignMap[codeKey]) {
+            campaignMap[codeKey] = {
+              code: codeKey,
+              orders: 0,
+              gross: 0,
+              net: 0,
+              channels: {}
+            };
+          }
+          campaignMap[codeKey].orders += r.Jumlah_Transaksi;
+          campaignMap[codeKey].gross += r.Omzet_Kotor;
+          campaignMap[codeKey].net += r.Omzet_Bersih;
+          campaignMap[codeKey].channels[r.Sumber_Data] = (campaignMap[codeKey].channels[r.Sumber_Data] || 0) + r.Omzet_Kotor;
+        }
+      });
+
+      const commissionCut = totalGross - totalNet;
+      const adSharePct = totalGross > 0 ? ((totalAdSpend / totalGross) * 100).toFixed(1) : "0.0";
+      const directRoas = totalAdSpend > 0 ? (directCampaignRev / totalAdSpend).toFixed(2) : "0.00";
+      const blendedRoas = totalAdSpend > 0 ? (totalGross / totalAdSpend).toFixed(2) : "0.00";
+      const waConvRate = waChats > 0 ? ((waOrders / waChats) * 100).toFixed(1) : "0.0";
+
+      // Update KPI DOM
+      document.getElementById("kpiGrossRev").textContent = formatIDR(totalGross);
+      document.getElementById("kpiTotalOrders").textContent = `${totalOrders.toLocaleString("id-ID")} total transaksi tercatat`;
+
+      document.getElementById("kpiNetRev").textContent = formatIDR(totalNet);
+      document.getElementById("kpiCommissionCut").textContent = `Potongan komisi marketplace: ${formatIDR(commissionCut)}`;
+
+      document.getElementById("kpiAdSpend").textContent = formatIDR(totalAdSpend);
+      document.getElementById("kpiAdShare").textContent = `Rasio biaya iklan terhadap omzet: ${adSharePct}%`;
+
+      document.getElementById("kpiDirectRoas").textContent = `${directRoas}x`;
+      document.getElementById("kpiCampaignRev").textContent = `Omzet terukur kode campaign: ${formatIDR(directCampaignRev)}`;
+
+      document.getElementById("kpiBlendedRoas").textContent = `${blendedRoas}x`;
+
+      document.getElementById("kpiWaConv").textContent = `${waConvRate}%`;
+      document.getElementById("kpiWaDetail").textContent = `${waOrders} closing dari ${waChats} chat masuk (${formatCompactIDR(waRev)})`;
+
+      renderDailyTrendChart(dailyMap);
+      renderChannelChart(channelTotals, totalGross);
+      renderCampaignTable(campaignMap, totalGross);
+    }
+
+    function renderDailyTrendChart(dailyMap) {
+      const labels = Object.keys(dailyMap).sort();
+      const grossSeries = labels.map(d => dailyMap[d].gross);
+      const netSeries = labels.map(d => dailyMap[d].net);
+      const spendSeries = labels.map(d => dailyMap[d].spend);
+
+      const ctx = document.getElementById("dailyTrendChart").getContext("2d");
+      if (trendChartInstance) trendChartInstance.destroy();
+
+      trendChartInstance = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels,
+          datasets: [
+            {
+              label: "Omzet Kotor",
+              data: grossSeries,
+              backgroundColor: "#095C2B",
+              borderRadius: 6,
+              order: 2
+            },
+            {
+              label: "Omzet Bersih",
+              data: netSeries,
+              backgroundColor: "#34D399",
+              borderRadius: 6,
+              order: 3
+            },
+            {
+              label: "Biaya Iklan (Ad Spend)",
+              data: spendSeries,
+              type: "line",
+              borderColor: "#F59E0B",
+              backgroundColor: "#F59E0B",
+              borderWidth: 2.5,
+              tension: 0.3,
+              pointRadius: 4,
+              order: 1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: "index", intersect: false },
+          plugins: {
+            legend: {
+              position: "top",
+              labels: { boxWidth: 12, usePointStyle: true, font: { size: 11 } }
+            },
+            tooltip: {
+              callbacks: {
+                label: ctx => `${ctx.dataset.label}: ${formatIDR(ctx.parsed.y)}`
+              }
+            }
+          },
+          scales: {
+            x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+            y: {
+              beginAtZero: true,
+              grid: { color: "#F1F5F9" },
+              ticks: {
+                font: { size: 11 },
+                callback: val => formatCompactIDR(val)
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function renderChannelChart(channelTotals, totalGross) {
+      const labels = ["POS Kasir", "WhatsApp", "GoFood", "GrabFood"];
+      const values = [
+        channelTotals.POS,
+        channelTotals.WA,
+        channelTotals.GoFood,
+        channelTotals.GrabFood
+      ];
+      const colors = ["#095C2B", "#25D366", "#EF4444", "#00B14F"];
+
+      const ctx = document.getElementById("channelChart").getContext("2d");
+      if (channelChartInstance) channelChartInstance.destroy();
+
+      channelChartInstance = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+          labels,
+          datasets: [{
+            data: values,
+            backgroundColor: colors,
+            borderWidth: 2,
+            borderColor: "#FFFFFF"
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: "68%",
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: ctx => {
+                  const pct = totalGross > 0 ? ((ctx.parsed / totalGross) * 100).toFixed(1) : 0;
+                  return `${ctx.label}: ${formatIDR(ctx.parsed)} (${pct}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
+
+      const legendContainer = document.getElementById("channelLegendList");
+      legendContainer.innerHTML = labels.map((lbl, idx) => {
+        const val = values[idx];
+        const pct = totalGross > 0 ? ((val / totalGross) * 100).toFixed(1) : "0.0";
+        return `
+          <div class="flex items-center justify-between py-1 border-b border-gray-50 last:border-none">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full" style="background:${colors[idx]}"></span>
+              <span class="font-medium text-gray-700">${lbl}</span>
+            </div>
+            <div class="text-right">
+              <span class="font-semibold text-gray-900">${formatCompactIDR(val)}</span>
+              <span class="text-gray-400 ml-1">(${pct}%)</span>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderCampaignTable(campaignMap, totalGross) {
+      const tbody = document.getElementById("campaignTableBody");
+      const sorted = Object.values(campaignMap).sort((a, b) => b.gross - a.gross);
+
+      if (sorted.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="py-8 text-center text-xs text-gray-400">
+              Tidak ada data transaksi pada rentang tanggal dan cabang yang dipilih.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = sorted.map((item, idx) => {
+        const share = totalGross > 0 ? ((item.gross / totalGross) * 100).toFixed(1) : "0.0";
+        const topChannel = Object.entries(item.channels).sort((a, b) => b[1] - a[1])[0]?.[0] || "-";
+        const isOrganic = item.code === "ORGANIK";
+        const badgeClass = isOrganic
+          ? "bg-gray-100 text-gray-700"
+          : "bg-emerald-50 text-emerald-800 border border-emerald-200";
+
+        return `
+          <tr class="hover:bg-gray-50/70 transition">
+            <td class="py-3.5 px-5 font-semibold text-gray-500">#${idx + 1}</td>
+            <td class="py-3.5 px-5">
+              <span class="inline-block px-2.5 py-1 rounded-lg text-xs font-bold tracking-wide ${badgeClass}">
+                ${item.code}
+              </span>
+            </td>
+            <td class="py-3.5 px-5 text-xs font-medium text-gray-600">${topChannel}</td>
+            <td class="py-3.5 px-5 text-right font-medium text-gray-800">${item.orders.toLocaleString("id-ID")}</td>
+            <td class="py-3.5 px-5 text-right font-semibold text-gray-900">${formatIDR(item.gross)}</td>
+            <td class="py-3.5 px-5 text-right font-semibold brand-green-text">${formatIDR(item.net)}</td>
+            <td class="py-3.5 px-5 text-right text-xs font-semibold text-gray-500">${share}%</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    // Modal Functions
+    function openConfigModal() {
+      document.getElementById("configModal").classList.remove("hidden");
+    }
+    function closeConfigModal() {
+      document.getElementById("configModal").classList.add("hidden");
+    }
+    function saveApiUrl() {
+      const url = document.getElementById("apiUrlInput").value.trim();
+      localStorage.setItem("akp_sheets_api_url", url);
+      closeConfigModal();
+      initDashboard();
+    }
+    function resetToDemoData() {
+      localStorage.removeItem("akp_sheets_api_url");
+      document.getElementById("apiUrlInput").value = "";
+      closeConfigModal();
+      initDashboard();
+    }
+
+    window.addEventListener("DOMContentLoaded", initDashboard);
+  </script>
+</body>
+</html>
